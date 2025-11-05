@@ -63,7 +63,7 @@ class WalletChangeBalanceView(UpdateAPIView):
 
             return Response({
                 'wallet_id': wallet.id,
-                'balance': wallet.amount
+                'amount': wallet.amount
             }, status=status.HTTP_200_OK)
 
         except Wallet.DoesNotExist:
