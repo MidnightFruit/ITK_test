@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView, \
     get_object_or_404
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from terminal.models import Wallet
 from terminal.serializers import WalletSerializer, OperationSerializer
@@ -35,9 +36,10 @@ class ListWalletView(ListAPIView):
     queryset = Wallet.objects.all()
     serializer_class = WalletSerializer
 
-class WalletChangeBalanceView(UpdateAPIView):
+class WalletChangeBalanceView(APIView):
     lookup_field = 'id'
     lookup_url_kwarg = 'wallet_uuid'
+    serializer_class = OperationSerializer
 
     def post(self, request, *args, **kwargs):
         wallet_uuid = kwargs['wallet_uuid']
