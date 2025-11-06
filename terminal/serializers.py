@@ -23,6 +23,6 @@ class OperationSerializer(serializers.Serializer):
         operation_type = attrs.get('operation_type')
         wallet = self.context.get('wallet')
 
-        if operation_type == 'WITHDRAW' and wallet.amount < amount:
+        if operation_type == 'WITHDRAW' and wallet.balance < amount:
             raise serializers.ValidationError('You do not have enough money.')
         return attrs
