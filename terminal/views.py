@@ -57,15 +57,15 @@ class WalletChangeBalanceView(APIView):
                 amount = serializer.validated_data['amount']
 
                 if operation_type == 'WITHDRAW':
-                    wallet.amount -= amount
+                    wallet.balance -= amount
                 elif operation_type == 'DEPOSIT':
-                    wallet.amount += amount
+                    wallet.balance += amount
 
                 wallet.save()
 
             return Response({
                 'wallet_id': wallet.id,
-                'amount': wallet.amount
+                'balance': wallet.balance
             }, status=status.HTTP_200_OK)
 
         except Wallet.DoesNotExist:

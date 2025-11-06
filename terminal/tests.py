@@ -17,8 +17,8 @@ from terminal.serializers import OperationSerializer
 class WalletAPITestCase(APITestCase):
 
     def setUp(self):
-        self.wallet1 = Wallet.objects.create(amount=100)
-        self.wallet2 = Wallet.objects.create(amount=0)
+        self.wallet1 = Wallet.objects.create(balance=100)
+        self.wallet2 = Wallet.objects.create(balance=0)
         self.wallet_uuid1 = self.wallet1.id
         self.wallet_uuid2 = self.wallet2.id
 
@@ -27,7 +27,7 @@ class WalletAPITestCase(APITestCase):
         Тестирование создания нового кошелька.
         """
         data = {
-            "amount": 1000,
+            "balance": 1000,
         }
         response = self.client.post('/api/v1/wallets/create/', data=data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -58,8 +58,8 @@ class WalletAPITestCase(APITestCase):
         self.assertEqual(len(response.data), 2)
 
         expected_data = [
-                {'id': str(self.wallet1.id), 'amount': '100.00'},
-                {'id': str(self.wallet2.id), 'amount': '0.00'}
+                {'id': str(self.wallet1.id), 'balance': '100.00'},
+                {'id': str(self.wallet2.id), 'balance': '0.00'}
             ]
         self.assertEqual(response.data, expected_data)
 
@@ -68,14 +68,14 @@ class WalletAPITestCase(APITestCase):
         Тестирование изменения кошелька.
         """
 
-        response = self.client.patch(reverse("terminal:wallet_update", args=[self.wallet_uuid1]), {"amount": 0})
+        response = self.client.patch(reverse("terminal:wallet_update", args=[self.wallet_uuid1]), {"balance": 0})
 
         self.assertEqual(
             response.status_code,
             status.HTTP_200_OK
         )
         wallet = Wallet.objects.get(id=self.wallet_uuid1)
-        self.assertEqual(wallet.amount, 0)
+        self.assertEqual(wallet.balance, 0)
 
     def test_destroy_wallet(self):
         """
@@ -93,7 +93,7 @@ class WalletAPITestCase(APITestCase):
         """
         Тестирование операции пополнения.
         """
-        init_balance = self.wallet1.amount
+        init_balance = self.wallet1.balance
         deposit = 100
         expected_result = init_balance + deposit
         data = {
@@ -107,14 +107,14 @@ class WalletAPITestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.wallet1.refresh_from_db()
-        self.assertEqual(self.wallet1.amount, expected_result)
-        self.assertEqual(response.data['amount'], Decimal(str(expected_result)))
+        self.assertEqual(self.wallet1.balance, expected_result)
+        self.assertEqual(response.data['balance'], Decimal(str(expected_result)))
 
     def test_withdraw_operation_wallet(self):
         """
         Тестирование операции снятия.
         """
-        init_balance = self.wallet1.amount
+        init_balance = self.wallet1.balance
         withdraw = 100
         expected_result = init_balance - withdraw
         data = {
@@ -128,14 +128,14 @@ class WalletAPITestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.wallet1.refresh_from_db()
-        self.assertEqual(self.wallet1.amount, expected_result)
-        self.assertEqual(response.data['amount'], Decimal(str(expected_result)))
+        self.assertEqual(self.wallet1.balance, expected_result)
+        self.assertEqual(response.data['balance'], Decimal(str(expected_result)))
 
     def test_withdraw_insufficient_funds(self):
         """
         Тестирование случая недостатка средств.
         """
-        init_balance = self.wallet1.amount
+        init_balance = self.wallet1.balance
         withdraw = init_balance + 1
         data = {
             "operation_type": "WITHDRAW",
@@ -151,7 +151,7 @@ class WalletAPITestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.wallet1.refresh_from_db()
-        self.assertEqual(self.wallet1.amount, init_balance)
+        self.assertEqual(self.wallet1.balance, init_balance)
         self.assertIn('non_field_errors', response.data)
 
     def test_wallet_not_found(self):
